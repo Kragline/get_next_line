@@ -22,24 +22,6 @@ size_t	ft_strlen(const char *s)
 	return (l);
 }
 
-char	*ft_strdup(const char *s1)
-{
-	char	*new;
-	int		i;
-
-	new = (char *)malloc(sizeof(char) * ft_strlen(s1) + 1);
-	if (!new)
-		return (NULL);
-	i = 0;
-	while (s1[i])
-	{
-		new[i] = s1[i];
-		i++;
-	}
-	new[i] = '\0';
-	return (new);
-}
-
 char	*ft_strchr(const char *s, int c)
 {
 	while (*s)
@@ -79,31 +61,29 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	return (str);
 }
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+void	ft_bzero(void *s, size_t n)
 {
-	unsigned int	s_size;
-	size_t			i;
-	char			*substr;
+	char	*str;
+	size_t	i;
 
-	if (!s)
-		return (NULL);
-	s_size = ft_strlen(s);
-	if (start >= s_size)
-	{
-		substr = (char *)malloc(1);
-		if (!substr)
-			return (NULL);
-		substr[0] = '\0';
-		return (substr);
-	}
-	if (len > s_size - start)
-		len = s_size - start;
-	substr = (char *)malloc((len + 1) * sizeof(char));
-	if (!substr)
-		return (NULL);
+	str = (char *)s;
 	i = 0;
-	while (i < len)
-		substr[i++] = s[start++];
-	substr[i] = '\0';
-	return (substr);
+	while (i < n)
+	{
+		str[i] = '\0';
+		i++;
+	}
+}
+
+void	*ft_calloc(size_t count, size_t size)
+{
+	void	*ptr;
+
+	if ((size != 0 && count > 65536) || (size > 65536 && count != 0))
+		return (NULL);
+	ptr = malloc(count * size);
+	if (!ptr)
+		return (NULL);
+	ft_bzero(ptr, count * size);
+	return (ptr);
 }
