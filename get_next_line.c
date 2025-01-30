@@ -6,7 +6,7 @@
 /*   By: armarake <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/29 13:36:26 by armarake          #+#    #+#             */
-/*   Updated: 2025/01/30 17:12:16 by armarake         ###   ########.fr       */
+/*   Updated: 2025/01/30 17:49:55 by armarake         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,30 +22,28 @@ char	*ft_join_free(char *storage, char *temp)
 	return (tmp);
 }
 
-static char	*ft_fill_storage(int fd, char *storage)
+static char	*ft_fill_storage(int fd, char *storage, char *buffer)
 {
-	char	*temp;
 	int		bytes;
 
 	if (!storage)
 		storage = ft_calloc(1, 1);
-	temp = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	bytes = 1;
 	while (!ft_strchr(storage, '\n') && bytes > 0)
 	{
-		bytes = read(fd, temp, BUFFER_SIZE);
+		bytes = read(fd, buffer, BUFFER_SIZE);
 		if (bytes == -1)
 		{
 			free(storage);
-			free(temp);
+			free(buffer);
+			buffer = NULL;
 			return (NULL);
 		}
 		else if (bytes == 0)
 			break ;
-		temp[bytes] = 0;
-		storage = ft_join_free(storage, temp);
+		buffer[bytes] = 0;
+		storage = ft_join_free(storage, buffer);
 	}
-	free(temp);
 	return (storage);
 }
 
@@ -97,16 +95,26 @@ static char	*ft_update_storage(char *storage)
 char	*get_next_line(int fd)
 {
 	static char	*storage = NULL;
+	char		*buffer;
 	char		*line;
 
+	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	{
+		free(storage);
+		free(buffer);
+		storage = NULL;
+		buffer = NULL;
 		return (NULL);
-	storage = ft_fill_storage(fd, storage);
+	}
+	storage = ft_fill_storage(fd, storage, buffer);
 	if (!storage)
 	{
 		free(storage);
 		return (NULL);
 	}
+	free(buffer);
+	buffer = NULL;
 	line = ft_get_line(storage);
 	storage = ft_update_storage(storage);
 	return (line);
