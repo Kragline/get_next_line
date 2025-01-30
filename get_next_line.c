@@ -12,112 +12,82 @@
 
 #include "get_next_line.h"
 
-char	*ft_join_free(char *storage, char *temp)
-{
-	char	*tmp;
-
-	tmp = ft_strjoin(storage, temp);
-	free(storage);
-	storage = NULL;
-	return (tmp);
-}
-
 static char	*ft_fill_storage(int fd, char *storage, char *buffer)
 {
-	int		bytes;
+	ssize_t	bytes;
+	char	*temp;
 
-	if (!storage)
-		storage = ft_calloc(1, 1);
 	bytes = 1;
-	while (!ft_strchr(storage, '\n') && bytes > 0)
+	while (bytes > 0)
 	{
 		bytes = read(fd, buffer, BUFFER_SIZE);
 		if (bytes == -1)
-		{
-			free(storage);
-			free(buffer);
-			buffer = NULL;
 			return (NULL);
-		}
 		else if (bytes == 0)
 			break ;
-		buffer[bytes] = 0;
-		storage = ft_join_free(storage, buffer);
+		buffer[bytes] = '\0';
+		temp = storage;
+		storage = ft_strjoin(temp, buffer);
+		if (!storage)
+		{
+			free(temp);
+			temp = NULL;
+			return (NULL);
+		}
+		if (ft_strchr(buffer, '\n'))
+			break ;
 	}
 	return (storage);
 }
 
-char	*ft_get_line(char *storage)
-{
-	char	*line;
-	int		i;
-
-	i = 0;
-	if (!storage[i])
-		return (NULL);
-	while (storage[i] && storage[i] != '\n' && storage[i] != '\0')
-		i++;
-	line = ft_calloc(i + 2, sizeof(char));
-	i = 0;
-	while (storage[i] && storage[i] != '\n' && storage[i] != '\0')
-	{
-		line[i] = storage[i];
-		i++;
-	}
-	if (storage[i] && storage[i] == '\n')
-		line[i] = '\n';
-	return (line);
-}
-
-static char	*ft_update_storage(char *storage)
+static char	*ft_update_storage(char *final_line)
 {
 	char	*updated;
-	int		i;
-	int		j;
+	ssize_t	i;
 
-	i = 0;
-	while (storage[i] && storage[i] != '\n')
-		i++;
-	if (!storage[i])
-	{
-		free(storage);
+	if (!final_line)
 		return (NULL);
-	}
-	updated = ft_calloc((ft_strlen(storage) - i + 1), sizeof(char));
-	i++;
-	j = 0;
-	while (storage[i])
-		updated[j++] = storage[i++];
-	free(storage);
+	i = 0;
+	while (final_line[i] && final_line[i] != '\n' && final_line[i] != '\0')
+		i++;
+	if (final_line[i] == '\0' || final_line[i + 1] == '\0')
+		return (NULL);
+	updated = ft_substr(final_line, i + 1, ft_strlen(final_line) - i);
+	if (!updated)
+		return (NULL);
+	final_line[i + 1] = '\0';
+	if (*updated == '\0')
+		updated = NULL;
 	return (updated);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*storage = NULL;
+	char		*final_line;
 	char		*buffer;
-	char		*line;
 
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0))
 	{
-		free(storage);
 		free(buffer);
-		storage = NULL;
-		buffer = NULL;
-		return (NULL);
-	}
-	storage = ft_fill_storage(fd, storage, buffer);
-	if (!storage)
-	{
 		free(storage);
+		buffer = NULL;
+		storage = NULL;
 		return (NULL);
 	}
+	if (!buffer)
+		return (NULL);
+	final_line = ft_fill_storage(fd, storage, buffer);
 	free(buffer);
 	buffer = NULL;
-	line = ft_get_line(storage);
-	storage = ft_update_storage(storage);
-	return (line);
+	if (!final_line || *final_line == '\0')
+	{
+		free(final_line);
+		return (NULL);
+	}
+	storage = ft_update_storage(final_line);
+	return (final_line);
 }
 
 // int main(void)
@@ -135,6 +105,6 @@ char	*get_next_line(int fd)
 // 	free(l2);
 // 	free(l3);
 // 	free(l4);
-// 	// system("leaks a.out");
+// 	system("leaks a.out");
 // 	return (0);
 // }

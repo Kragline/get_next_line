@@ -12,78 +12,82 @@
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *s)
+size_t	ft_strlen(const char *src)
 {
-	size_t	l;
+	size_t	i;
 
-	l = 0;
-	while (s[l])
-		l++;
-	return (l);
-}
-
-char	*ft_strchr(const char *s, int c)
-{
-	while (*s)
-	{
-		if (*s == (const char)c)
-			return ((char *)s);
-		s++;
-	}
-	if (*s == (const char)c)
-		return ((char *)s);
-	return (NULL);
-}
-
-char	*ft_strjoin(char const *s1, char const *s2)
-{
-	size_t	size;
-	char	*str;
-	int		i;
-	int		j;
-
-	if (!s1 || !s2)
+	if (!src)
 		return (0);
-	size = ft_strlen(s1) + ft_strlen(s2);
-	str = (char *)malloc((size + 1) * sizeof(char));
-	if (!str)
+	i = 0;
+	while (src[i] != '\0')
+		i++;
+	return (i);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char	*res;
+	size_t	len;
+	size_t	i;
+	size_t	j;
+
+	len = ft_strlen(s1) + ft_strlen(s2);
+	res = (char *)malloc((len + 1) * sizeof(char));
+	if (!res)
 		return (NULL);
 	i = 0;
-	while (s1[i])
+	while (s1 && s1[i])
 	{
-		str[i] = s1[i];
+		res[i] = s1[i];
 		i++;
 	}
 	j = 0;
-	while (s2[j])
-		str[i++] = s2[j++];
-	str[i] = '\0';
-	return (str);
+	while (s2 && s2[j])
+		res[i++] = s2[j++];
+	res[i] = '\0';
+	free(s1);
+	s1 = NULL;
+	return (res);
 }
 
-void	ft_bzero(void *s, size_t n)
+char	*ft_strchr(const char *str, int c)
 {
-	char	*str;
-	size_t	i;
+	unsigned int	i;
 
-	str = (char *)s;
 	i = 0;
-	while (i < n)
-	{
-		str[i] = '\0';
+	while (str[i] && str[i] != (char)c)
 		i++;
-	}
+	if (str[i] == (char)c)
+		return ((char *)&str[i]);
+	else
+		return (NULL);
 }
 
-void	*ft_calloc(size_t count, size_t size)
+char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-	void	*ptr;
+	unsigned int	s_size;
+	size_t			i;
+	char			*substr;
 
-	if ((size != 0 && count > 65536) || (size > 65536 && count != 0))
+	if (!s)
 		return (NULL);
-	ptr = malloc(count * size);
-	if (!ptr)
+	s_size = ft_strlen(s);
+	if (start >= s_size)
+	{
+		substr = (char *)malloc(1);
+		if (!substr)
+			return (NULL);
+		substr[0] = '\0';
+		return (substr);
+	}
+	if (len > s_size - start)
+		len = s_size - start;
+	substr = (char *)malloc((len + 1) * sizeof(char));
+	if (!substr)
 		return (NULL);
-	ft_bzero(ptr, count * size);
-	return (ptr);
+	i = 0;
+	while (i < len)
+		substr[i++] = s[start++];
+	substr[i] = '\0';
+	return (substr);
 }
