@@ -6,7 +6,7 @@
 /*   By: armarake <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/29 13:36:07 by armarake          #+#    #+#             */
-/*   Updated: 2025/01/29 15:55:57 by armarake         ###   ########.fr       */
+/*   Updated: 2025/01/30 15:44:35 by armarake         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,5 +28,6 @@ size_t	ft_strlen(const char *s);
 char	*ft_strchr(const char *s, int c);
 char	*ft_strjoin(char const *s1, char const *s2);
 void	*ft_calloc(size_t count, size_t size);
+void	ft_bzero(void *s, size_t n);
 
 #endif

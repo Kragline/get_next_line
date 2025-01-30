@@ -6,7 +6,7 @@
 /*   By: armarake <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/29 13:36:26 by armarake          #+#    #+#             */
-/*   Updated: 2025/01/29 17:16:59 by armarake         ###   ########.fr       */
+/*   Updated: 2025/01/30 17:12:16 by armarake         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,11 @@ char	*ft_join_free(char *storage, char *temp)
 
 	tmp = ft_strjoin(storage, temp);
 	free(storage);
+	storage = NULL;
 	return (tmp);
 }
 
-char	*ft_fill_storage(int fd, char *storage)
+static char	*ft_fill_storage(int fd, char *storage)
 {
 	char	*temp;
 	int		bytes;
@@ -30,19 +31,21 @@ char	*ft_fill_storage(int fd, char *storage)
 		storage = ft_calloc(1, 1);
 	temp = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	bytes = 1;
-	while (bytes > 0)
+	while (!ft_strchr(storage, '\n') && bytes > 0)
 	{
 		bytes = read(fd, temp, BUFFER_SIZE);
 		if (bytes == -1)
 		{
+			free(storage);
 			free(temp);
 			return (NULL);
 		}
+		else if (bytes == 0)
+			break ;
 		temp[bytes] = 0;
 		storage = ft_join_free(storage, temp);
-		if (ft_strchr(storage, '\n'))
-			break ;
 	}
+	free(temp);
 	return (storage);
 }
 
@@ -54,11 +57,11 @@ char	*ft_get_line(char *storage)
 	i = 0;
 	if (!storage[i])
 		return (NULL);
-	while (storage[i] && storage[i] != '\n')
+	while (storage[i] && storage[i] != '\n' && storage[i] != '\0')
 		i++;
-	line = ft_calloc(i, sizeof(char));
+	line = ft_calloc(i + 2, sizeof(char));
 	i = 0;
-	while (storage[i] && storage[i] != '\n')
+	while (storage[i] && storage[i] != '\n' && storage[i] != '\0')
 	{
 		line[i] = storage[i];
 		i++;
@@ -68,21 +71,21 @@ char	*ft_get_line(char *storage)
 	return (line);
 }
 
-char	*ft_update_storage(char *storage)
+static char	*ft_update_storage(char *storage)
 {
 	char	*updated;
 	int		i;
 	int		j;
 
 	i = 0;
+	while (storage[i] && storage[i] != '\n')
+		i++;
 	if (!storage[i])
 	{
 		free(storage);
 		return (NULL);
 	}
-	while (storage[i] && storage[i] != '\n')
-		i++;
-	updated = ft_calloc(ft_strlen(storage) - i, sizeof(char));
+	updated = ft_calloc((ft_strlen(storage) - i + 1), sizeof(char));
 	i++;
 	j = 0;
 	while (storage[i])
@@ -93,14 +96,17 @@ char	*ft_update_storage(char *storage)
 
 char	*get_next_line(int fd)
 {
-	static char	*storage;
+	static char	*storage = NULL;
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
 	storage = ft_fill_storage(fd, storage);
 	if (!storage)
+	{
+		free(storage);
 		return (NULL);
+	}
 	line = ft_get_line(storage);
 	storage = ft_update_storage(storage);
 	return (line);
@@ -109,11 +115,18 @@ char	*get_next_line(int fd)
 // int main(void)
 // {
 // 	int fd = open("new.txt", O_RDONLY);
-// 	int i = 1;
-// 	while (i < 5)
-// 	{
-// 		printf("[%d] %s", i, get_next_line(fd));
-// 		i++;
-// 	}
+// 	char *l1 = get_next_line(fd);
+// 	char *l2 = get_next_line(fd);
+// 	char *l3 = get_next_line(fd);
+// 	char *l4 = get_next_line(fd);
+// 	printf("%s", l1);
+// 	printf("%s", l2);
+// 	printf("%s", l3);
+// 	printf("%s", l4);
+// 	free(l1);
+// 	free(l2);
+// 	free(l3);
+// 	free(l4);
+// 	// system("leaks a.out");
 // 	return (0);
 // }
