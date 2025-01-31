@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: armarake <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/29 13:36:26 by armarake          #+#    #+#             */
-/*   Updated: 2025/01/31 13:42:11 by armarake         ###   ########.fr       */
+/*   Created: 2025/01/31 13:44:12 by armarake          #+#    #+#             */
+/*   Updated: 2025/01/31 13:53:09 by armarake         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static char	*ft_fill_storage(int fd, char *storage, char *buffer)
 {
@@ -63,22 +63,22 @@ static char	*ft_update_storage(char *final_line)
 
 char	*get_next_line(int fd)
 {
-	static char	*storage = NULL;
+	static char	*storage[OPEN_MAX];
 	char		*final_line;
 	char		*buffer;
 
 	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (!buffer)
 		return (NULL);
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0))
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) || fd > OPEN_MAX)
 	{
 		free(buffer);
-		free(storage);
+		free(storage[fd]);
 		buffer = NULL;
-		storage = NULL;
+		storage[fd] = NULL;
 		return (NULL);
 	}
-	final_line = ft_fill_storage(fd, storage, buffer);
+	final_line = ft_fill_storage(fd, storage[fd], buffer);
 	free(buffer);
 	buffer = NULL;
 	if (!final_line || *final_line == '\0')
@@ -86,6 +86,6 @@ char	*get_next_line(int fd)
 		free(final_line);
 		return (NULL);
 	}
-	storage = ft_update_storage(final_line);
+	storage[fd] = ft_update_storage(final_line);
 	return (final_line);
 }
