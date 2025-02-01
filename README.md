@@ -1,3 +1,3 @@
 WARNING!!!
 
-Program works only for mac, on linux OPEN_MAX macro is undefined
+To run bonus part on linux replace OPEN_MAX macro with 1024
