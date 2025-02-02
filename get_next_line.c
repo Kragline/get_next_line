@@ -6,7 +6,7 @@
 /*   By: armarake <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/29 13:36:26 by armarake          #+#    #+#             */
-/*   Updated: 2025/01/31 13:42:11 by armarake         ###   ########.fr       */
+/*   Updated: 2025/02/02 18:47:50 by armarake         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ static char	*ft_update_storage(char *final_line)
 
 char	*get_next_line(int fd)
 {
-	static char	*storage = NULL;
+	static char	*storage;
 	char		*final_line;
 	char		*buffer;
 
